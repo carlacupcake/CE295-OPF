@@ -41,7 +41,7 @@ def generate_json_from_pv_data(directory):
 
     # Iterate through all files in the directory
     for file in os.listdir(directory):
-        
+
         if file.endswith(".csv"):                                      # only iterate over csv files
             filepath = os.path.join(directory, file)                   # Get the full file path
             filename = os.path.splitext(os.path.basename(filepath))[0] # use filename as column name
@@ -54,7 +54,7 @@ def generate_json_from_pv_data(directory):
 
             # Replace negative values with zeros          
             power_data = data_in['RealPower']  # only extract real power, not datetime
-
+            
             # Find how many entities we can extract from this single entity
             num_data_points = power_data.shape[0]
             num_entities = int(np.floor(num_data_points/num_points_per_entity))
@@ -62,9 +62,11 @@ def generate_json_from_pv_data(directory):
             # Loop over the entities and store daily data for each
             for entity in range(num_entities):
                 start = entity * num_points_per_entity
-                end = start + num_points_per_entity
-                key_name = filename + str(entity)
-                pv_data[key_name] = power_data[start:end]
+                end   = start + num_points_per_entity
+                
+                key_name          = filename + str(entity)
+                this_data         = power_data[start:end]
+                pv_data[key_name] = this_data.tolist()
 
     pv_dict = {}
     for column in pv_data.columns:
@@ -152,10 +154,15 @@ def generate_json_from_bldg_data(directory):
             # Loop over the entities and store daily data for each
             for entity in range(num_entities):
                 start = entity * num_points_per_entity
-                end = start + num_points_per_entity
+                end   = start + num_points_per_entity
+                
                 key_name = filename + str(entity)
-                real_data[key_name] = real_power[start:end]
-                reactive_data[key_name] = reactive_power[start:end]
+                
+                this_real_data     = real_power[start:end]
+                this_reactive_data = reactive_power[start:end]
+                
+                real_data[key_name]     = this_real_data.tolist()
+                reactive_data[key_name] = this_reactive_data.tolist()
 
     real_dict = {}
     reactive_dict = {}
@@ -314,10 +321,12 @@ def generate_json_from_wind_data(directory):
 
             # Loop over the entities and store daily data for each
             for entity in range(num_entities):
-                start = entity * num_points_per_entity
-                end = start + num_points_per_entity
+                start    = entity * num_points_per_entity
+                end      = start + num_points_per_entity
                 key_name = filename + str(entity)
-                wind_data[key_name] = wind_power[start:end]
+                
+                this_data           = wind_power[start:end]
+                wind_data[key_name] = this_data.tolist()
 
     wind_dict = {}
     for column in wind_data.columns:
